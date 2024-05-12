@@ -1,4 +1,9 @@
-import React, { BaseSyntheticEvent, useEffect, useState } from "react";
+import React, {
+  BaseSyntheticEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
@@ -7,6 +12,8 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { Base64StringWithType, Category, Product } from "../../types";
 import { useAppSelector } from "../../redux/index";
+import { FaRegCopy } from "react-icons/fa";
+import { SlRefresh } from "react-icons/sl";
 
 type ProductAddProps = {
   loading?: boolean | undefined;
@@ -21,6 +28,8 @@ const ProductAdd: React.FC<ProductAddProps> = ({
   fetchProductData = undefined,
   setVisible = undefined,
 }) => {
+  const { jwtToken } = useAppSelector((state) => state.auth);
+
   const [updateProductId, setUpdateProductId] = useState<string | null>(null);
 
   const [variantQuantity, setVariantQuantity] = useState<number | undefined>();
@@ -46,26 +55,30 @@ const ProductAdd: React.FC<ProductAddProps> = ({
   const [categoryList, setCategoryList] = useState([]);
 
   // ! Fetch category logic
-  useEffect(() => {
-    const fetchCategoryData = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.VITE_APP_API_URL}/categories`,
-          {
-            headers: {
-              Authorization: `Bearer ${jwtToken}`,
-            },
-          }
-        );
-        setCategoryList(response.data.categories);
-      } catch (error: any) {
-        console.error(error);
-        toast.error(
-          error.response.data?.message || "Some unknown error occured"
-        );
-      }
-    };
 
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+
+  const fetchCategoryData = useCallback(async () => {
+    try {
+      setIsCategoryLoading(true);
+      const response = await axios.get(
+        `${process.env.VITE_APP_API_URL}/categories`,
+        {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+        }
+      );
+      setCategoryList(response.data.categories);
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.response.data?.message || "Some unknown error occured");
+    } finally {
+      setIsCategoryLoading(false);
+    }
+  }, [jwtToken]);
+
+  useEffect(() => {
     fetchCategoryData();
   }, []);
 
@@ -159,9 +172,9 @@ const ProductAdd: React.FC<ProductAddProps> = ({
 
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
-  const { jwtToken } = useAppSelector((state) => state.auth);
+  function convertImagesToBase64(imageFiles: File[] | FileList | null) {
+    if (!imageFiles) return;
 
-  function convertImagesToBase64(imageFiles: File[]) {
     const promises = Array.from(imageFiles).map((file) => {
       return new Promise((resolve, reject) => {
         const fileReader = new FileReader();
@@ -177,35 +190,32 @@ const ProductAdd: React.FC<ProductAddProps> = ({
 
   const handleAddProduct = async () => {
     try {
-      productData.previewImage = (await convertImagesToBase64(
-        productData.previewImage as File[]
-      )) as Base64StringWithType[];
-
-      if (!!(productData.slideImages as FileList).length) {
-        const slideImages = (await convertImagesToBase64(
-          productData.slideImages as File[]
-        )) as Base64StringWithType[];
-        productData.slideImages = slideImages;
-      }
-
-      const variants = Object.values(
-        productData.productVariant !== undefined &&
-          !Array.isArray(productData.productVariant)
-          ? productData.productVariant
-          : {}
-      );
-
-      for (let i = 0; i < variants.length; i++) {
-        variants[i].previewImage = (await convertImagesToBase64(
-          variants[i].previewImage as File[]
-        )) as Base64StringWithType[];
-        if ((variants[i].slideImages as File[]).length > 0) {
-          const slideImages = (await convertImagesToBase64(
-            variants[i].slideImages as File[]
-          )) as Base64StringWithType[];
-          variants[i].slideImages = slideImages;
-        }
-      }
+      // productData.previewImage = (await convertImagesToBase64(
+      //   productData.previewImage as File[]
+      // )) as Base64StringWithType[];
+      // if (!!(productData.slideImages as FileList).length) {
+      //   const slideImages = (await convertImagesToBase64(
+      //     productData.slideImages as File[]
+      //   )) as Base64StringWithType[];
+      //   productData.slideImages = slideImages;
+      // }
+      // const variants = Object.values(
+      //   productData.productVariant !== undefined &&
+      //     !Array.isArray(productData.productVariant)
+      //     ? productData.productVariant
+      //     : {}
+      // );
+      // for (let i = 0; i < variants.length; i++) {
+      //   variants[i].previewImage = (await convertImagesToBase64(
+      //     variants[i].previewImage as File[]
+      //   )) as Base64StringWithType[];
+      //   if ((variants[i].slideImages as File[]).length > 0) {
+      //     const slideImages = (await convertImagesToBase64(
+      //       variants[i].slideImages as File[]
+      //     )) as Base64StringWithType[];
+      //     variants[i].slideImages = slideImages;
+      //   }
+      // }
     } catch (error) {
       console.error(error);
     }
@@ -229,45 +239,40 @@ const ProductAdd: React.FC<ProductAddProps> = ({
 
   const handleUpdateProduct = async () => {
     try {
-      if (!!(productData.previewImage as FileList).length) {
-        productData.previewImage = (await convertImagesToBase64(
-          productData.previewImage as File[]
-        )) as Base64StringWithType[];
-
-        console.log(
-          "What is the result after convertion -->",
-          productData.previewImage
-        );
-      }
-
-      if (!!(productData.slideImages as FileList).length) {
-        const slideImages = (await convertImagesToBase64(
-          productData.slideImages as File[]
-        )) as Base64StringWithType[];
-        productData.slideImages = slideImages;
-      }
-
-      const variants = Object.values(
-        productData.productVariant !== undefined &&
-          !Array.isArray(productData.productVariant)
-          ? productData.productVariant
-          : {}
-      );
-
-      for (let i = 0; i < variants.length; i++) {
-        if ((variants[i].previewImage as File[]).length) {
-          variants[i].previewImage = (await convertImagesToBase64(
-            variants[i].previewImage as File[]
-          )) as Base64StringWithType[];
-        }
-
-        if ((variants[i].slideImages as File[]).length > 0) {
-          const slideImages = (await convertImagesToBase64(
-            variants[i].slideImages as File[]
-          )) as Base64StringWithType[];
-          variants[i].slideImages = slideImages;
-        }
-      }
+      // if (!!(productData.previewImage as FileList).length) {
+      //   productData.previewImage = (await convertImagesToBase64(
+      //     productData.previewImage as File[]
+      //   )) as Base64StringWithType[];
+      //   console.log(
+      //     "What is the result after convertion -->",
+      //     productData.previewImage
+      //   );
+      // }
+      // if (!!(productData.slideImages as FileList).length) {
+      //   const slideImages = (await convertImagesToBase64(
+      //     productData.slideImages as File[]
+      //   )) as Base64StringWithType[];
+      //   productData.slideImages = slideImages;
+      // }
+      // const variants = Object.values(
+      //   productData.productVariant !== undefined &&
+      //     !Array.isArray(productData.productVariant)
+      //     ? productData.productVariant
+      //     : {}
+      // );
+      // for (let i = 0; i < variants.length; i++) {
+      //   if ((variants[i].previewImage as File[]).length) {
+      //     variants[i].previewImage = (await convertImagesToBase64(
+      //       variants[i].previewImage as File[]
+      //     )) as Base64StringWithType[];
+      //   }
+      //   if ((variants[i].slideImages as File[]).length > 0) {
+      //     const slideImages = (await convertImagesToBase64(
+      //       variants[i].slideImages as File[]
+      //     )) as Base64StringWithType[];
+      //     variants[i].slideImages = slideImages;
+      //   }
+      // }
     } catch (error) {
       console.error(error);
     }
@@ -417,14 +422,31 @@ const ProductAdd: React.FC<ProductAddProps> = ({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label
-                  htmlFor="centerCategory"
-                  className="block text-sm font-medium text-gray-700">
-                  Category{" "}
-                  {!updateProductId && (
-                    <span className="text-red-500 font-extrabold">*</span>
-                  )}
-                </label>
+                <div className="flex justify-between items-center">
+                  {/* <button
+                    type="button"
+                    disabled={isCategoryLoading}
+                    onClick={fetchCategoryData}
+                    className="text-md flex items-center border border-indigo-400 bg-indigo-400 p-1 font-semibold mb-3 text-white gap-x-1 px-2 rounded-md">
+                    
+                  </button> */}
+                  <label
+                    htmlFor="centerCategory"
+                    className="block text-sm font-medium text-gray-700">
+                    Category{" "}
+                    {!updateProductId && (
+                      <span className="text-red-500 font-extrabold">*</span>
+                    )}
+                  </label>
+                  <button
+                    type="button"
+                    disabled={isCategoryLoading}
+                    onClick={fetchCategoryData}
+                    className={`${isCategoryLoading && "animate-spin"}`}>
+                    <SlRefresh />
+                  </button>
+                </div>
+
                 <select
                   id="centerCategory"
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm h-10 border border-gray-300 px-2"
@@ -481,30 +503,55 @@ const ProductAdd: React.FC<ProductAddProps> = ({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label
-                  htmlFor="productPreviewImage"
-                  className="block text-sm font-medium text-gray-700">
-                  Preview Image{" "}
-                  {!updateProductId && (
-                    <span className="text-red-500 font-extrabold">*</span>
-                  )}
-                </label>
-                <input
-                  type="file"
-                  id="productPreviewImage"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border border-gray-300"
-                  aria-label="Preview Image"
-                  accept="image/*"
-                  onChange={(e) => {
-                    setProductData((prev) => {
-                      return { ...prev, previewImage: e.target.files };
-                    });
-                  }}
-                  required={!updateProductId}
-                />
+                <div>
+                  <label
+                    htmlFor="productPreviewImage"
+                    className="block text-sm font-medium text-gray-700">
+                    Preview Image{" "}
+                    {!updateProductId && (
+                      <span className="text-red-500 font-extrabold">*</span>
+                    )}
+                  </label>
+                  <input
+                    type="file"
+                    id="productPreviewImage"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border border-gray-300"
+                    aria-label="Preview Image"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const base64convertedFiles = (await convertImagesToBase64(
+                        e.target.files as FileList
+                      )) as Base64StringWithType[];
+
+                      setProductData((prev) => {
+                        return { ...prev, previewImage: base64convertedFiles };
+                      });
+                    }}
+                    required={!updateProductId}
+                  />
+                </div>
+
+                <div className="w-full h-[200px] aspect-square overflow-hidden mt-1">
+                  <img
+                    className="h-[200px] w-[200px] aspect-square object-fit"
+                    src={
+                      productData.previewImage &&
+                      Array.isArray(productData.previewImage) &&
+                      (productData?.previewImage as Base64StringWithType[])
+                        ?.length > 0
+                        ? (
+                            (
+                              productData?.previewImage as Base64StringWithType[]
+                            )[0] as Base64StringWithType
+                          )?.base64String
+                        : "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                    }
+                  />
+                </div>
               </div>
 
               <div>
+                <div></div>
                 <label
                   htmlFor="productSlideImage"
                   className="block text-sm font-medium text-gray-700">
@@ -519,9 +566,13 @@ const ProductAdd: React.FC<ProductAddProps> = ({
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border border-gray-300"
                   aria-label="Slide Images"
                   accept="image/*"
-                  onChange={(e) => {
+                  onChange={async (e) => {
+                    const base64convertedFiles = (await convertImagesToBase64(
+                      e.target.files as FileList
+                    )) as Base64StringWithType[];
+
                     setProductData((prev) => {
-                      return { ...prev, slideImages: e.target.files };
+                      return { ...prev, slideImages: base64convertedFiles };
                     });
                   }}
                   multiple={true}
@@ -810,87 +861,77 @@ const ProductAdd: React.FC<ProductAddProps> = ({
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                               <div>
-                                <label
-                                  htmlFor={`variantPreviewImages-${index + 1}`}
-                                  className="block text-sm font-medium text-gray-700">
-                                  Preview Image{" "}
-                                  {!updateProductId && (
-                                    <span className="text-red-500 font-extrabold">
-                                      *
-                                    </span>
-                                  )}
-                                </label>
-                                <input
-                                  id={`variantPreviewImages-${index + 1}`}
-                                  type="file"
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border border-gray-300"
-                                  aria-label="Variant Preview Image"
-                                  accept="image/*"
-                                  onChange={(e) => {
-                                    setProductData((prev) => {
-                                      return {
-                                        ...prev,
-                                        productVariant: {
-                                          ...prev.productVariant,
-                                          [`variant_no_${index}`]: {
-                                            ...(
-                                              prev.productVariant as {
-                                                [key: string]: any;
-                                              }
-                                            )[`variant_no_${index}`],
-                                            previewImage: e.target.files,
+                                <div>
+                                  <label
+                                    htmlFor={`variantPreviewImages-${
+                                      index + 1
+                                    }`}
+                                    className="block text-sm font-medium text-gray-700">
+                                    Preview Image{" "}
+                                    {!updateProductId && (
+                                      <span className="text-red-500 font-extrabold">
+                                        *
+                                      </span>
+                                    )}
+                                  </label>
+                                  <input
+                                    id={`variantPreviewImages-${index + 1}`}
+                                    type="file"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border border-gray-300"
+                                    aria-label="Variant Preview Image"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                      const base64convertedFiles =
+                                        (await convertImagesToBase64(
+                                          e.target.files as FileList
+                                        )) as Base64StringWithType[];
+                                      setProductData((prev) => {
+                                        return {
+                                          ...prev,
+                                          productVariant: {
+                                            ...prev.productVariant,
+                                            [`variant_no_${index}`]: {
+                                              ...(
+                                                prev.productVariant as {
+                                                  [key: string]: any;
+                                                }
+                                              )[`variant_no_${index}`],
+                                              previewImage:
+                                                base64convertedFiles,
+                                            },
                                           },
-                                        },
-                                      };
-                                    });
-                                  }}
-                                  required={!updateProductId}
-                                />
-
-                                {/* <div className="flex items-center justify-center w-fit h-fit">
-                              <label
-                                htmlFor={`variantPreviewImages-${index + 1}`}
-                                className="cursor-pointer bg-white p-8 rounded-md border-2 border-dashed border-gray-600 shadow-md mt-1"> {!updateProductId && <span className="text-red-500 font-extrabold">*</span>}
-                                <div className="flex flex-col items-center justify-center gap-1">
-                                  <svg
-                                    viewBox="0 0 640 512"
-                                    className="h-12 mb-5 fill-gray-600">
-                                    <path d="M144 480C64.5 480 0 415.5 0 336c0-62.8 40.2-116.2 96.2-135.9c-.1-2.7-.2-5.4-.2-8.1c0-88.4 71.6-160 160-160c59.3 0 111 32.2 138.7 80.2C409.9 102 428.3 96 448 96c53 0 96 43 96 96c0 12.2-2.3 23.8-6.4 34.6C596 238.4 640 290.1 640 352c0 70.7-57.3 128-128 128H144zm79-217c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l39-39V392c0 13.3 10.7 24 24 24s24-10.7 24-24V257.9l39 39c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-80-80c-9.4-9.4-24.6-9.4-33.9 0l-80 80z"></path>
-                                  </svg>
-                                  <p>Drag and Drop</p>
-                                  <p>or</p>
-                                  <span className="bg-gray-600 text-white py-1 px-3 rounded-lg transition-all duration-300 hover:bg-gray-800">
-                                    Browse file
-                                  </span>
+                                        };
+                                      });
+                                    }}
+                                    required={!updateProductId}
+                                  />
                                 </div>
-                                <input
-                                  id={`variantPreviewImages-${index + 1}`}
-                                  type="file"
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border border-gray-300 hidden"
-                                  aria-label="Variant Preview Image"
-                                  accept="image/*"
-                                  onChange={(e) => {
-                                    setProductData((prev) => {
-                                      return {
-                                        ...prev,
-                                        productVariant: {
-                                          ...prev.productVariant,
-                                          [`variant_no_${index}`]: {
-                                            ...prev.productVariant[
-                                              `variant_no_${index}`
-                                            ],
-                                            previewImage: Array.from(
-                                              e.target.files
-                                            ),
-                                          },
-                                        },
-                                      };
-                                    });
-                                  }}
-                                  required={!updateProductId}
-                                />
-                              </label>
-                            </div> */}
+                                <div className="w-full h-[200px] aspect-square overflow-hidden mt-1">
+                                  <img
+                                    className="h-[200px] w-[200px] aspect-square object-fit"
+                                    src={
+                                      productData.productVariant &&
+                                      !Array.isArray(
+                                        productData.productVariant
+                                      ) &&
+                                      (
+                                        productData.productVariant[
+                                          `variant_no_${index}`
+                                        ]
+                                          ?.previewImage as Base64StringWithType[]
+                                      )?.length > 0
+                                        ? (
+                                            (
+                                              productData.productVariant[
+                                                `variant_no_${index}`
+                                              ]
+                                                ?.previewImage as Base64StringWithType[]
+                                            )[0] as Base64StringWithType
+                                          )?.base64String
+                                        : "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                                    }
+                                  />
+                                </div>
                               </div>
 
                               <div>
@@ -910,7 +951,11 @@ const ProductAdd: React.FC<ProductAddProps> = ({
                                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border border-gray-300"
                                   aria-label="Variant Slide Images"
                                   accept="image/*"
-                                  onChange={(e) => {
+                                  onChange={async (e) => {
+                                    const base64convertedFiles =
+                                      (await convertImagesToBase64(
+                                        e.target.files as FileList
+                                      )) as Base64StringWithType[];
                                     setProductData((prev) => {
                                       return {
                                         ...prev,
@@ -922,7 +967,7 @@ const ProductAdd: React.FC<ProductAddProps> = ({
                                                 [key: string]: any;
                                               }
                                             )[`variant_no_${index}`],
-                                            slideImages: e.target.files,
+                                            slideImages: base64convertedFiles,
                                           },
                                         },
                                       };
@@ -982,9 +1027,43 @@ const ProductAdd: React.FC<ProductAddProps> = ({
                           </div>
 
                           <div className="bg-white p-4 rounded shadow-lg border">
-                            <h3 className="text-xl font-semibold mb-3">
-                              Variant Pricing
-                            </h3>
+                            <div className="flex justify-between">
+                              <h3 className="text-xl font-semibold mb-3">
+                                Variant Pricing
+                              </h3>
+                              <button
+                                onClick={() => {
+                                  setProductData((prev) => {
+                                    return {
+                                      ...prev,
+                                      productVariant: {
+                                        ...prev.productVariant,
+                                        [`variant_no_${index}`]: {
+                                          ...(
+                                            prev.productVariant as {
+                                              [key: string]: any;
+                                            }
+                                          )[`variant_no_${index}`],
+                                          rentingPrice:
+                                            +productData.rentingPrice || "",
+                                          originalPrice:
+                                            +productData.originalPrice || "",
+                                          discountedPrice:
+                                            +productData.discountedPrice || "",
+                                          shippingPrice:
+                                            +productData.shippingPrice || "",
+                                          availableStocks:
+                                            +productData.availableStocks || "",
+                                        },
+                                      },
+                                    };
+                                  });
+                                }}
+                                type="button"
+                                className="text-md flex items-center border border-indigo-400 bg-indigo-400 p-1 font-semibold mb-3 text-white gap-x-1 px-2 rounded-md">
+                                <FaRegCopy /> Copy Base
+                              </button>
+                            </div>
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                               <div>
@@ -1296,12 +1375,13 @@ const ProductAdd: React.FC<ProductAddProps> = ({
                                 <label
                                   htmlFor={`variantSize-${index + 1}`}
                                   className="block text-sm font-medium text-gray-700">
-                                  Size{" "}
+                                  Size(s){" "}
                                   {!updateProductId && (
                                     <span className="text-red-500 font-extrabold">
                                       *
                                     </span>
                                   )}
+                                  {/* <span className="text-red-500 ml-1"></span> */}
                                 </label>
                                 <input
                                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm h-10 border border-gray-300 px-2"
@@ -1333,7 +1413,7 @@ const ProductAdd: React.FC<ProductAddProps> = ({
                                   }}
                                   type="text"
                                   id={`variantSize-${index + 1}`}
-                                  placeholder="S | L | XL | 8 etc."
+                                  placeholder="Comma separated sizes or single size."
                                   required={!updateProductId}
                                 />
                               </div>
