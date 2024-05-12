@@ -25,8 +25,8 @@ export const wishlistApi = createApi({
         url: `wishlist`,
         method: "GET",
       }),
-      transformResponse: (response, meta, arg) => (response as any).data,
-      // transformErrorResponse: (response, meta, arg) => response.message,
+      transformResponse: (response) => (response as any).data,
+      // transformErrorResponse: (response) => response.message,
       providesTags: ["Wishlist"],
     }),
 
@@ -37,7 +37,7 @@ export const wishlistApi = createApi({
         body: { productId: id },
       }),
       invalidatesTags: ["Wishlist"],
-      // transformErrorResponse: (response, meta, arg) => response.message,
+      // transformErrorResponse: (response) => response.message,
     }),
 
     deleteWishlist: builder.mutation({
@@ -46,7 +46,7 @@ export const wishlistApi = createApi({
         method: "DELETE",
       }),
       invalidatesTags: ["Wishlist"],
-      // transformErrorResponse: (response, meta, arg) => response.message,
+      // transformErrorResponse: (response) => response.message,
     }),
 
     updateWishlist: builder.mutation({
@@ -56,7 +56,7 @@ export const wishlistApi = createApi({
         body: item,
       }),
       invalidatesTags: ["Wishlist"],
-      // transformErrorResponse: (response, meta, arg) => response.message,
+      // transformErrorResponse: (response) => response.message,
     }),
   }),
 });

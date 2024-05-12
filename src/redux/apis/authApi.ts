@@ -3,17 +3,17 @@ import { setUserAuthData } from "../slices/authSlice";
 
 const SERVER_URL = `${process.env.EXPO_PUBLIC_API_URL}/`;
 
-type User = {
-  name: string;
-  email: string;
-  mobileNo: string;
-  jwtToken: string;
-};
+// type User = {
+//   name: string;
+//   email: string;
+//   mobileNo: string;
+//   jwtToken: string;
+// };
 
-interface Auth {
-  message: string;
-  user: User;
-}
+// interface Auth {
+//   message: string;
+//   user: User;
+// }
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -25,7 +25,7 @@ export const authApi = createApi({
         method: "POST",
         body: user,
       }),
-      onQueryStarted: async (args, { dispatch, queryFulfilled }) => {
+      onQueryStarted: async (_: any, { dispatch, queryFulfilled }) => {
         try {
           const response = await queryFulfilled;
           dispatch(setUserAuthData(response.data));
@@ -41,7 +41,7 @@ export const authApi = createApi({
         method: "POST",
         body: user,
       }),
-      onQueryStarted: async (args, { dispatch, queryFulfilled }) => {
+      onQueryStarted: async (_: any, { dispatch, queryFulfilled }) => {
         try {
           const response = await queryFulfilled;
           dispatch(setUserAuthData(response.data));

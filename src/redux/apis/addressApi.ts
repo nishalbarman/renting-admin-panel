@@ -41,7 +41,7 @@ export const addressApi = createApi({
         method: "GET",
       }),
       providesTags: ["Address"],
-      transformResponse: (response: any, meta) => response.result.data,
+      transformResponse: (response: any) => response.result.data,
       // transformErrorResponse: (response, meta, arg) => response.message,
     }),
 

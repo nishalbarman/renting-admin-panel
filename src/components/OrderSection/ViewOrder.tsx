@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { toast } from "react-toastify";
 import { useSearchParams } from "react-router-dom";
-import { useAppSelector } from "@redux";
+import { useAppSelector } from "../../redux/index";
 import { OrderGroup, PaymentSummary } from "../../types";
 
 type StatusStyleValue = {

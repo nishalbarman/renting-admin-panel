@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 
 import { attachComma } from "../../helper/utils";
 
-import { useAppSelector } from "@redux";
+import { useAppSelector } from "../../redux/index";
 import { OrderGroup } from "../../types";
 
 const OrderList = () => {

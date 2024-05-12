@@ -22,8 +22,8 @@ export const centerAddressApi = createApi({
         method: "GET",
       }),
       providesTags: ["Address"],
-      transformResponse: (response, meta, arg) => (response as any).data,
-      // transformErrorResponse: (response, meta, arg) => response.message,
+      transformResponse: (response) => (response as any).data,
+      // transformErrorResponse: (response) => response.message,
     }),
 
     addCenterAddress: builder.mutation({
@@ -33,7 +33,7 @@ export const centerAddressApi = createApi({
         body: address,
       }),
       invalidatesTags: ["Address"],
-      // transformErrorResponse: (response, meta, arg) => response.message,
+      // transformErrorResponse: (response) => response.message,
     }),
 
     deleteCenterAddress: builder.mutation({
@@ -42,7 +42,7 @@ export const centerAddressApi = createApi({
         method: "DELETE",
       }),
       invalidatesTags: ["Address"],
-      // transformErrorResponse: (response, meta, arg) => response.message,
+      // transformErrorResponse: (response) => response.message,
     }),
 
     updateCenterAddress: builder.mutation({
@@ -52,7 +52,7 @@ export const centerAddressApi = createApi({
         body: updatedAddress,
       }),
       invalidatesTags: ["Address"],
-      // transformErrorResponse: (response, meta, arg) => response.message,
+      // transformErrorResponse: (response) => response.message,
     }),
   }),
 });

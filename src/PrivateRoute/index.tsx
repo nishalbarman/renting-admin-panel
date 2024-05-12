@@ -1,4 +1,4 @@
-import { useAppSelector } from "@redux";
+import { useAppSelector } from "../redux/index";
 import React from "react";
 import { Navigate } from "react-router-dom";
 

@@ -19,7 +19,7 @@ import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import ConfirmModal from "../ConfirmModal";
 import ProductUpdateModal from "./ProductUpdateModal";
-import { useAppSelector } from "@redux";
+import { useAppSelector } from "../../redux/index";
 import { Product } from "../../types";
 
 const ListProduct = () => {

@@ -6,7 +6,7 @@ import axios from "axios";
 
 import { toast } from "react-toastify";
 import { Base64StringWithType, Category, Product } from "../../types";
-import { useAppSelector } from "@redux";
+import { useAppSelector } from "../../redux/index";
 
 type ProductAddProps = {
   loading?: boolean | undefined;

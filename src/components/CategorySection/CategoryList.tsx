@@ -1,7 +1,7 @@
 import { BaseSyntheticEvent, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useAppSelector } from "@redux";
+import { useAppSelector } from "../../redux/index";
 
 import { Base64StringWithType, Category } from "../../types";
 

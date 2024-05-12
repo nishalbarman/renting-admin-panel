@@ -19,8 +19,8 @@ export const cartApi = createApi({
     getCart: builder.query({
       query: (productType) => `cart?productType=${productType}`,
       providesTags: ["Cart"],
-      transformResponse: (res, meta, arg) => (res as any).data,
-      transformErrorResponse: (res, meta, arg) => (res as any).message,
+      transformResponse: (res) => (res as any).data,
+      transformErrorResponse: (res) => (res as any).message,
     }),
 
     addOneToCart: builder.mutation({
@@ -42,7 +42,7 @@ export const cartApi = createApi({
         },
       }),
       invalidatesTags: ["Cart"],
-      // transformErrorResponse: (res, meta, arg) => res.message,
+      // transformErrorResponse: (res) => res.message,
     }),
 
     updateCart: builder.mutation({
@@ -54,7 +54,7 @@ export const cartApi = createApi({
         };
       },
       invalidatesTags: ["Cart"],
-      transformErrorResponse: (res, meta, arg) => (res as any).message,
+      transformErrorResponse: (res) => (res as any).message,
     }),
 
     updateRentDaysCart: builder.mutation({
@@ -68,7 +68,7 @@ export const cartApi = createApi({
         };
       },
       invalidatesTags: ["Cart"],
-      transformErrorResponse: (res, meta, arg) => (res as any).message,
+      transformErrorResponse: (res) => (res as any).message,
     }),
 
     updateQuantityCart: builder.mutation({
@@ -82,7 +82,7 @@ export const cartApi = createApi({
         };
       },
       invalidatesTags: ["Cart"],
-      transformErrorResponse: (res, meta, arg) => (res as any).message,
+      transformErrorResponse: (res) => (res as any).message,
     }),
 
     deleteCart: builder.mutation({
@@ -91,7 +91,7 @@ export const cartApi = createApi({
         method: "DELETE",
       }),
       invalidatesTags: ["Cart"],
-      // transformErrorResponse: (res, meta, arg) => res.message,
+      // transformErrorResponse: (res) => res.message,
     }),
   }),
 });

@@ -26,7 +26,7 @@ export const userAPI = createApi({
           "Content-Type": "application/json",
         },
       }),
-      onQueryStarted: async (args, { dispatch, queryFulfilled, getState }) => {
+      onQueryStarted: async (_: any, { dispatch, queryFulfilled }) => {
         try {
           const response = await queryFulfilled;
           dispatch(setUserAuthData(response.data));
@@ -44,7 +44,7 @@ export const userAPI = createApi({
           "Content-Type": "application/json",
         },
       }),
-      onQueryStarted: async (args, { dispatch, queryFulfilled, getState }) => {
+      onQueryStarted: async (_: any, { dispatch, queryFulfilled }) => {
         try {
           const response = await queryFulfilled;
           dispatch(setUserAuthData(response.data));
@@ -64,7 +64,7 @@ export const userAPI = createApi({
         },
         body: { email: newEmail, prevEmailOTP, newEmailOTP },
       }),
-      onQueryStarted: async (args, { dispatch, getState, queryFulfilled }) => {
+      onQueryStarted: async (_: any, { dispatch, queryFulfilled }) => {
         try {
           const response = await queryFulfilled;
           dispatch(setUserAuthData(response.data));
@@ -84,7 +84,7 @@ export const userAPI = createApi({
         },
         body: { mobileNo: newMobileNo, prevMobileOTP, newMobileOTP },
       }),
-      onQueryStarted: async (args, { dispatch, getState, queryFulfilled }) => {
+      onQueryStarted: async (_: any, { dispatch, queryFulfilled }) => {
         try {
           const response = await queryFulfilled;
           dispatch(setUserAuthData(response.data));
