@@ -6,6 +6,8 @@ import { useSearchParams } from "react-router-dom";
 import { useAppSelector } from "../../redux/index";
 import { OrderGroup, PaymentSummary } from "../../types";
 
+import stopSign from "../../assets/stop-sign.png";
+
 type StatusStyleValue = {
   backgroundColor: string;
   border: string;
@@ -268,8 +270,14 @@ function ViewSingleOrder() {
                             key={order._id}
                             className="bg-white rounded-lg shadow-md overflow-hidden relative border">
                             {order.orderStatus === "Cancelled" && (
-                              <div className="absolute inset-0 flex items-center justify-center backdrop-blur-sm bg-black bg-opacity-10">
-                                <strong className="text-red-500 font-bold text-lg transform rotate-[-18deg] text-center text-shadow">
+                              <div className="absolute inset-0 flex items-center justify-center backdrop-blur-sm bg-black bg-opacity-10 flex-col">
+                                <img
+                                  src={stopSign}
+                                  alt="stop-sign"
+                                  className="mr-4"
+                                />
+                                <strong className="text-red-500 font-bold text-lg transform text-center text-shadow">
+                                  {/* rotate-[-18deg]  */}
                                   Order Cancelled By User, Do not fullfill this
                                   order
                                 </strong>
@@ -324,7 +332,7 @@ function ViewSingleOrder() {
                                     Delivery Charge:{" "}
                                     <span className="font-bold">
                                       {order.orderType === "buy"
-                                        ? `₹ {order.shippingPrice}`
+                                        ? `₹${order.shippingPrice}`
                                         : "Not Applicable"}
                                     </span>
                                   </div>
@@ -335,9 +343,175 @@ function ViewSingleOrder() {
                         ))}
                       </div>
                     </div>
+
                     <div>
+                      <div className="bg-white rounded-lg shadow-md border mb-6">
+                        <div className="bg-white p-4 pb-0 flex items-center gap-2">
+                          <img
+                            src="https://st5.depositphotos.com/4226061/62815/v/450/depositphotos_628157962-stock-illustration-invoice-icon-payment-bill-invoice.jpg"
+                            alt="Update Status"
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                          <strong>Update Status</strong>
+                        </div>
+                        <div className="p-4">
+                          {groupOrderDetails.orderType === "rent" && (
+                            // <div className="text-red-500 font-bold mb-4">
+                            //   * This is a rent order, so collect cash upon
+                            //   pickup.
+                            // </div>
+                            <div className="bg-red-100 border border-red-400 text-red-700 p-3 rounded mb-4">
+                              <div>
+                                This is a rent order, so collect cash upon
+                                pickup.
+                              </div>
+                            </div>
+                          )}
+
+                          {groupOrderDetails.orderType === "buy" && (
+                            <div className="bg-green-100 border border-green-400 text-green-700 p-3 rounded mb-4">
+                              <div>
+                                This is a buy order, so make sure that payment
+                                has been received before proceeding.
+                              </div>
+                            </div>
+                          )}
+                          <div className="mt-2">
+                            <strong>Update status of the order</strong>
+                            <div className="mt-2">
+                              <select
+                                onChange={(e) =>
+                                  setOrderUpdatableStatus(e.target.value)
+                                }
+                                className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select Status</option>
+                                {groupOrderDetails.orderType === "rent" && (
+                                  <option value={"On Progress"}>
+                                    On Progress
+                                  </option>
+                                )}
+                                <option value={"Accepted"}>Accept</option>
+                                <option value={"Rejected"}>Reject</option>
+                                <option value={"On The Way"}>On The Way</option>
+                                {groupOrderDetails.orderType === "buy" && (
+                                  <option value={"Delivered"}>Delivered</option>
+                                )}
+                                {groupOrderDetails.orderType === "rent" && (
+                                  <option value={"PickUp Ready"}>
+                                    PickUp Ready
+                                  </option>
+                                )}
+                              </select>
+
+                              {orderUpdatableStatus === "On The Way" && (
+                                <>
+                                  <div className="mt-4">
+                                    <label
+                                      htmlFor="trackingLink"
+                                      className="block font-bold mb-2">
+                                      Tracking Link
+                                    </label>
+                                    <input
+                                      id="trackingLink"
+                                      type="url"
+                                      placeholder="https://example.com/id-13"
+                                      value={groupTrackingLink}
+                                      onChange={(e) =>
+                                        setGroupTrackingLink(e.target.value)
+                                      }
+                                      className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                  </div>
+                                </>
+                              )}
+
+                              <button
+                                onClick={handleUpdateOrderStatus}
+                                className="mt-4 w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                UPDATE
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="bg-white rounded-lg shadow-md mb-6 border">
-                        <div className="bg-white p-4">
+                        <div className="bg-white p-4 pb-0">
+                          <div className="flex justify-between items-center">
+                            <strong>Payment Summary</strong>
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          {groupOrderDetails.orderType === "rent" && (
+                            <div className="bg-red-100 border border-red-400 text-red-700 p-3 rounded mb-4">
+                              <div>
+                                This is a rent order, so collect cash upon
+                                pickup.
+                              </div>
+                            </div>
+                          )}
+
+                          {groupOrderDetails.orderType === "buy" && (
+                            <div className="bg-green-100 border border-green-400 text-green-700 p-3 rounded mb-4">
+                              <div>
+                                This is a buy order, so make sure that payment
+                                has been received before proceeding.
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="h-px bg-gray-300 my-4"></div>
+
+                          {summary !== undefined && (
+                            <div className="mt-2">
+                              <div className="flex justify-between">
+                                <span>
+                                  Subtotal (
+                                  {groupOrderDetails.totalDocumentCount} items)
+                                </span>
+                                <span>₹{summary.subTotalPrice}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Delivery</span>
+                                <span>₹{summary.shippingPrice}</span>
+                              </div>
+                              <div className="flex justify-between font-bold">
+                                <span>Total</span>
+                                <span>₹{summary.totalPrice}</span>
+                              </div>
+
+                              {groupOrderDetails.orderType === "buy" && (
+                                <>
+                                  <div className="h-px bg-gray-300 my-4"></div>
+                                  <div className="flex justify-between font-bold">
+                                    <span>Payment Status</span>
+                                    <div className="flex flex-col justify-between">
+                                      {summary.paymentStatus === "Pending" && (
+                                        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-3 py-1 rounded-md text-center font-bold">
+                                          Pending
+                                        </div>
+                                      )}
+                                      {summary.paymentStatus === "Paid" && (
+                                        <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-1 rounded-md text-center font-bold">
+                                          Paid
+                                        </div>
+                                      )}
+                                      {summary.paymentStatus === "Failed" && (
+                                        <div className="bg-purple-100 border border-purple-400 text-purple-700 px-3 py-1 rounded-md text-center font-bold">
+                                          Failed
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="bg-white rounded-lg shadow-md mb-6 border">
+                        <div className="bg-white p-4 pb-0">
                           <div>
                             <strong>Customer</strong>
                           </div>
@@ -425,165 +599,6 @@ function ViewSingleOrder() {
                               </div>
                             </>
                           )}
-                        </div>
-                      </div>
-
-                      <div className="bg-white rounded-lg shadow-md mb-6 border">
-                        <div className="bg-white p-4">
-                          <div className="flex justify-between items-center">
-                            <strong>Payment Summary</strong>
-                          </div>
-                        </div>
-                        <div className="p-4">
-                          {groupOrderDetails.orderType === "rent" && (
-                            <div className="bg-red-100 border border-red-400 text-red-700 p-3 rounded mb-4">
-                              <div>
-                                This is a rent order, so collect cash upon
-                                pickup.
-                              </div>
-                            </div>
-                          )}
-
-                          {groupOrderDetails.orderType === "buy" && (
-                            <div className="bg-green-100 border border-green-400 text-green-700 p-3 rounded mb-4">
-                              <div>
-                                This is a buy order, so make sure that payment
-                                has been received before proceeding.
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="h-px bg-gray-300 my-4"></div>
-
-                          {summary !== undefined && (
-                            <div className="mt-2">
-                              <div className="flex justify-between">
-                                <span>
-                                  Subtotal (
-                                  {groupOrderDetails.totalDocumentCount} items)
-                                </span>
-                                <span>₹{summary.subTotalPrice}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Delivery</span>
-                                <span>₹{summary.shippingPrice}</span>
-                              </div>
-                              <div className="flex justify-between font-bold">
-                                <span>Total</span>
-                                <span>₹{summary.totalPrice}</span>
-                              </div>
-
-                              {groupOrderDetails.orderType === "buy" && (
-                                <>
-                                  <div className="h-px bg-gray-300 my-4"></div>
-                                  <div className="flex justify-between font-bold">
-                                    <span>Payment Status</span>
-                                    <div className="flex flex-col justify-between">
-                                      {summary.paymentStatus === "Pending" && (
-                                        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-3 py-1 rounded-md text-center font-bold">
-                                          Pending
-                                        </div>
-                                      )}
-                                      {summary.paymentStatus === "Paid" && (
-                                        <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-1 rounded-md text-center font-bold">
-                                          Paid
-                                        </div>
-                                      )}
-                                      {summary.paymentStatus === "Failed" && (
-                                        <div className="bg-purple-100 border border-purple-400 text-purple-700 px-3 py-1 rounded-md text-center font-bold">
-                                          Failed
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="bg-white rounded-lg shadow-md border">
-                        <div className="bg-white p-4 flex items-center gap-2">
-                          <img
-                            src="https://st5.depositphotos.com/4226061/62815/v/450/depositphotos_628157962-stock-illustration-invoice-icon-payment-bill-invoice.jpg"
-                            alt="Update Status"
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                          <strong>Update Status</strong>
-                        </div>
-                        <div className="p-4">
-                          {groupOrderDetails.orderType === "rent" && (
-                            <div className="text-red-500 font-bold mb-4">
-                              * This is a rent order, so collect cash upon
-                              pickup.
-                            </div>
-                          )}
-
-                          {groupOrderDetails.orderType === "buy" && (
-                            <div className="bg-green-100 border border-green-400 text-green-700 p-3 rounded mb-4">
-                              <div>
-                                This is a buy order, so make sure that payment
-                                has been received before proceeding.
-                              </div>
-                            </div>
-                          )}
-                          <div className="mt-2">
-                            <strong>Update status of the order</strong>
-                            <div className="mt-2">
-                              <select
-                                onChange={(e) =>
-                                  setOrderUpdatableStatus(e.target.value)
-                                }
-                                className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Select Status</option>
-                                {groupOrderDetails.orderType === "rent" && (
-                                  <option value={"On Progress"}>
-                                    On Progress
-                                  </option>
-                                )}
-                                <option value={"Accepted"}>Accept</option>
-                                <option value={"Rejected"}>Reject</option>
-                                <option value={"On The Way"}>On The Way</option>
-                                {groupOrderDetails.orderType === "buy" && (
-                                  <option value={"Delivered"}>Delivered</option>
-                                )}
-                                {groupOrderDetails.orderType === "rent" && (
-                                  <option value={"PickUp Ready"}>
-                                    PickUp Ready
-                                  </option>
-                                )}
-                              </select>
-
-                              {orderUpdatableStatus === "On The Way" && (
-                                <>
-                                  <div className="mt-4">
-                                    <label
-                                      htmlFor="trackingLink"
-                                      className="block font-bold mb-2">
-                                      Tracking Link
-                                    </label>
-                                    <input
-                                      id="trackingLink"
-                                      type="url"
-                                      placeholder="https://example.com/id-13"
-                                      value={groupTrackingLink}
-                                      onChange={(e) =>
-                                        setGroupTrackingLink(e.target.value)
-                                      }
-                                      className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                  </div>
-                                </>
-                              )}
-
-                              <button
-                                onClick={handleUpdateOrderStatus}
-                                className="mt-4 w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                                UPDATE
-                              </button>
-                            </div>
-                          </div>
                         </div>
                       </div>
                     </div>
